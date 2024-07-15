@@ -14,9 +14,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                checkout scm
+                // Clone the Git repository
+                echo 'Cloning Git repository...'
+                git url: "${GIT_REPO}"
             }
         }
         // Other stages
