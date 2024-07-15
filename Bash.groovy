@@ -6,11 +6,13 @@
 pipeline {
     agent any
 
+//Defines environment variables `BUILD_VERSION` as '1.0.0' and `DEPLOY_ENV` as 'production' for use in the pipeline. 
     environment {
         BUILD_VERSION = '1.0.0'
         DEPLOY_ENV = 'production'
     }
 
+    //Defines a 'Build' stage that echoes the build version and runs `mvn clean package` to clean and package the project.
     stages {
         stage('Build') {
             steps {
@@ -18,12 +20,17 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
+        
+    //Defines a 'Test' stage that echoes the build version and runs `mvn test` to execute the project's tests.
         stage('Test') {
             steps {
                 echo "Testing version ${BUILD_VERSION}..."
                 sh 'mvn test'
             }
         }
+
+    //Defines a 'Deploy' stage that echoes the build version and deployment environment, 
+    //then runs `kubectl apply -f deployment.yaml` with a timeout of 60 seconds to deploy the application.
         stage('Deploy') {
             steps {
                 echo "Deploying version ${BUILD_VERSION} to ${DEPLOY_ENV} environment..."
