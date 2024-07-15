@@ -12,6 +12,13 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+    stages {
         stage('Test') {
             steps {
                 script {
@@ -72,17 +79,9 @@ pipeline {
             }
         }
 
-        stage('Deploy with Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    echo 'Deploying to Kubernetes...'
-                    // Set the new image for the Kubernetes deployment
-                    sh """
-                    kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-deployment your-container=${ARTIFACTORY_URL}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    // Wait for the deployment to complete
-                    kubectl --kubeconfig=${KUBECONFIG} rollout status deployment/your-deployment
-                    """
-                }
+                sh 'kubectl apply -f deployment.yaml'
             }
         }
     }
