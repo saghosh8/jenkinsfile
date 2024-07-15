@@ -2,94 +2,87 @@ pipeline {
     agent any
 
     environment {
-        // Define environment variables for Docker image name, Artifactory credentials, and Kubernetes config
-        DOCKER_IMAGE = "your-docker-image-name"
-        ARTIFACTORY_URL = "https://your-artifactory-server/artifactory"
-        ARTIFACTORY_REPO = "your-docker-repo"
-        ARTIFACTORY_USER = credentials('artifactory-username') // Artifactory username from Jenkins credentials
-        ARTIFACTORY_PASS = credentials('artifactory-password') // Artifactory password from Jenkins credentials
-        KUBECONFIG = credentials('kubeconfig') // Kubernetes config file from Jenkins credentials
+        GIT_BRANCH = "${env.BRANCH_NAME}"
+        DOCKER_IMAGE_NAME = "my-app:${GIT_BRANCH}"
+        KUBERNETES_NAMESPACE = "my-namespace"
+        SONARQUBE_HOST = "sonarqube-server"
+        SONARQUBE_TOKEN = "your-token"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
-            }
-        }
-
-    stages {
-        stage('Test') {
-            steps {
-                script {
-                    echo 'Running tests...'
-                    // Add your test commands here
-                    // For example: sh 'npm test'
-                }
+                git url: 'https://github.com/your-repo.git', branch: "${GIT_BRANCH}"
             }
         }
 
         stage('Build') {
             steps {
-                script {
-                    echo 'Building the project...'
-                    // Add your build commands here
-                    // For example: sh 'mvn clean package'
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube Server') {
+                    sh 'sonar-scanner'
                 }
+            }
+        }
+
+        stage('Code Quality') {
+            steps {
+                sh 'pmd:checkstyle'
+                sh 'pmd:cpd'
             }
         }
 
         stage('Docker Build') {
             steps {
-                script {
-                    echo 'Building Docker image...'
-                    // Build the Docker image using the Dockerfile in the current directory
-                    sh 'docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .'
+                docker.build(DOCKER_IMAGE_NAME)
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                docker.withRegistry('https://registry.docker.io', 'dockerhub_creds') {
+                    docker.image(DOCKER_IMAGE_NAME).push()
                 }
             }
         }
 
-        stage('Docker Push to Artifactory') {
+        stage('Kubernetes Deployment') {
             steps {
                 script {
-                    echo 'Pushing Docker image to Artifactory...'
-                    // Log in to Artifactory
-                    sh """
-                    docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASS} ${ARTIFACTORY_URL}
-                    // Tag the Docker image with the Artifactory URL and repository
-                    docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${ARTIFACTORY_URL}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    // Push the Docker image to Artifactory
-                    docker push ${ARTIFACTORY_URL}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    """
+                    def kubectl = new KubernetesClient(kubeconfigFile: '/path/to/kubeconfig')
+                    kubectl.load('deployment.yaml')
+                    kubectl.deploy(namespace: KUBERNETES_NAMESPACE)
                 }
-            }
-        }
-
-        stage('Retrieve Docker Image from Artifactory') {
-            steps {
-                script {
-                    echo 'Retrieving Docker image from Artifactory...'
-                    // Log in to Artifactory
-                    sh """
-                    docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASS} ${ARTIFACTORY_URL}
-                    // Pull the Docker image from Artifactory
-                    docker pull ${ARTIFACTORY_URL}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh 'kubectl apply -f deployment.yaml'
             }
         }
     }
 
     post {
         always {
-            // Clean up the workspace after the pipeline finishes
-            cleanWs()
+            script {
+                cleanupWorkspace()
+            }
+        }
+        success {
+            script {
+                mail to: 'your_email@example.com', subject: 'Build Successful', body: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} has succeeded."
+            }
+        }
+        failure {
+            script {
+                mail to: 'your_email@example.com', subject: 'Build Failed', body: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} has failed."
+            }
         }
     }
 }
