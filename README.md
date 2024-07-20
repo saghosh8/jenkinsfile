@@ -1,6 +1,5 @@
 
-## Understanding the Project Based on the Image
-
+## Understanding the Project
 **Project Purpose:**
 
  This project is a collection of Groovy scripts designed for Continuous Integration and Continuous Delivery (CI/CD) pipelines. The scripts cover various aspects of CI/CD, such as:
