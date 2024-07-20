@@ -54,10 +54,6 @@ Here's a basic structure for the README.md file:
 
 * Guidelines for contributing to the project.
 
-#### **License**
-
-* Information about the project's license.
-
 ### **Additional Considerations**
 
 * **Code Formatting:** Ensure consistent code formatting and indentation for readability.
@@ -67,6 +63,3 @@ Here's a basic structure for the README.md file:
 
 By following this structure and providing clear explanations, you can create a helpful README.md file that guides users in understanding and utilizing the project.
 
-**Would you like to start writing the README.md file based on this outline?** 
- 
-**Note:** I can provide more specific guidance if you can share additional details about the project, such as the CI/CD platform used, the specific functionalities of the scripts, and the target audience.
