@@ -17,13 +17,8 @@
 
 **Target Audience:**
 
-This project seems to be intended for developers and DevOps engineers who are familiar with Groovy and Jenkins (or a similar CI/CD platform).
+This project is intended for developers and DevOps engineers who are familiar with Groovy and Jenkins (or a similar CI/CD platform).
 
-## Proposed README.md Structure
-
-Here's a basic structure for the README.md file:
-
-### **README.md**
 
 #### **Project Overview**
 
