@@ -3,7 +3,7 @@
 
 **Project Purpose:**
 
-Based on the file names provided in the image, it appears that this project is a collection of Groovy scripts designed for Continuous Integration and Continuous Delivery (CI/CD) pipelines. The scripts cover various aspects of CI/CD, such as:
+ This project is a collection of Groovy scripts designed for Continuous Integration and Continuous Delivery (CI/CD) pipelines. The scripts cover various aspects of CI/CD, such as:
 
 * **Agent management:** `add-agent-each-stage.groovy`
 * **Job orchestration:** `call-job1-from-job2.groovy`
